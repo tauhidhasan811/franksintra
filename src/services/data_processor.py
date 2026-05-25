@@ -7,6 +7,15 @@ import ast
 
 
 
+class DataProcessor:
+    @staticmethod
+    def _get_value(item, key):
+        if isinstance(item, dict):
+            return item.get(key, "")
+        return getattr(item, key, "")
+
+
+
 class ProcessData:
     
     @staticmethod
@@ -27,7 +36,7 @@ class ProcessData:
                 cleaned = ast.literal_eval(cleaned)
             except (ValueError, SyntaxError) as e:
                 print(f"Error parsing content with ast.literal_eval: {e}")
-                cleaned = None  # Or handle the error as needed (e.g., return a default value or an empty dict/list)
+                cleaned = {None}  # Or handle the error as needed (e.g., return a default value or an empty dict/list)
 
         return cleaned
             

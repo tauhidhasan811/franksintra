@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import Dict, List
+from typing import List, Optional
 import json
 
 class ChatHistoryItem(BaseModel):
@@ -22,3 +22,15 @@ class ChatWithFile(BaseModel):
 class Chatbody(BaseModel):
     previous_chat: List[ChatHistoryItem]
     user_query: str
+
+
+class RegenerateChatBody(BaseModel):
+    previous_chat: List[ChatHistoryItem]
+    user_query: Optional[str] = None
+    regenerate_instruction: Optional[str] = (
+        "Regenerate the previous AI response with a clearer, more complete, and more accurate answer."
+    )
+
+
+class ImagePromptBody(BaseModel):
+    image_url: str
