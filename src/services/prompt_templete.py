@@ -4,7 +4,6 @@ import json
 class PromptGenerator:
 
     OUTPUT_FORMAT = {
-        "brand_identification": "Brand or company name visible in the image (e.g., 'Nike', 'Unknown')",
         "file_name": "SEO-friendly lowercase hyphenated filename without extension (e.g., 'nike-air-max-running-shoe-red')",
         "title": "Short, compelling product or image title (e.g., 'Nike Air Max - Mens Red Running Shoe')",
         "caption": "One-sentence engaging social media caption for this image",
@@ -13,6 +12,61 @@ class PromptGenerator:
         "assign_location": "Physical location or region visible or inferable from the image (e.g., 'New York, USA'). Use 'Unknown' if not determinable.",
         "gmb_post": "A short Google My Business post (2-3 sentences) promoting this product or image"
     }
+
+    @staticmethod
+    def _text_message(role: str, text: str) -> dict:
+        return {
+            "role": role,
+            "content": [
+                {
+                    "type": "input_text",
+                    "text": text
+                }
+            ]
+        }
+
+    @staticmethod
+    def InitialPrompt() -> list:
+        return [
+            PromptGenerator._text_message(
+                "system",
+                "You are a helpful assistant. Be concise, friendly, and accurate."
+            ),
+            PromptGenerator._text_message(
+                "user",
+                "Start the conversation with a short helpful greeting."
+            )
+        ]
+
+    @staticmethod
+    def GeneralPrompt(
+        user_query: str,
+        relevent_info=None,
+        previous_chat=None,
+        file_data=None
+    ) -> list:
+        file_context = "No uploaded file data."
+        if file_data and file_data.get("is_read"):
+            file_context = file_data.get("data", "")
+
+        return [
+            PromptGenerator._text_message(
+                "system",
+                (
+                    "You are a helpful assistant. Use previous conversation, relevant "
+                    "knowledge, and uploaded file content when they help answer the user."
+                )
+            ),
+            PromptGenerator._text_message(
+                "user",
+                (
+                    f"Previous conversation:\n{previous_chat or 'No previous conversation.'}\n\n"
+                    f"Relevant knowledge:\n{relevent_info or 'No relevant knowledge.'}\n\n"
+                    f"Uploaded file content:\n{file_context}\n\n"
+                    f"User request:\n{user_query}"
+                )
+            )
+        ]
 
     @staticmethod
     def _build_system_instruction() -> str:
@@ -68,7 +122,7 @@ class PromptGenerator:
     def regenerate_prompt(
         previous_response: dict,
         update_field_name: str,
-        user_instruction: str,
+        user_instruction: str | None,
         image_url: str ) -> list:
         """
         Generates a prompt to update a specific field in a previous response.
@@ -86,6 +140,10 @@ class PromptGenerator:
             )
 
         previous_json = json.dumps(previous_response, indent=2)
+        instruction = (
+            user_instruction
+            or f"Regenerate '{update_field_name}' with a fresh, accurate, SEO-friendly alternative."
+        )
 
         prompt =  [ {
                 "role": "system",
@@ -113,7 +171,7 @@ class PromptGenerator:
                         "text": (
                             f"Previous JSON response:\n{previous_json}\n\n"
                             f"Field to update: '{update_field_name}'\n"
-                            f"User instruction: {user_instruction}\n\n"
+                            f"User instruction: {instruction}\n\n"
                             f"Return the full updated JSON object with only '{update_field_name}' changed."
                         )
                     },

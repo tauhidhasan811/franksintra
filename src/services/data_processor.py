@@ -14,6 +14,33 @@ class DataProcessor:
             return item.get(key, "")
         return getattr(item, key, "")
 
+    @staticmethod
+    def process_previous_history(previous_data):
+        if not previous_data:
+            return "No previous conversation."
+
+        history_lines = []
+        for index, item in enumerate(previous_data[-10:], start=1):
+            user_query = DataProcessor._get_value(item, "user_query")
+            ai_response = DataProcessor._get_value(item, "ai_response")
+            history_lines.append(f"{index}. User: {user_query}\nAI: {ai_response}")
+
+        return "\n\n".join(history_lines)
+
+    @staticmethod
+    def file_reader_route(path):
+        try:
+            with open(path, "r", encoding="utf-8") as file:
+                return {
+                    "is_read": True,
+                    "data": file.read()
+                }
+        except UnicodeDecodeError:
+            return {
+                "is_read": False,
+                "data": "Uploaded file could not be read as text."
+            }
+
 
 
 class ProcessData:
@@ -39,8 +66,13 @@ class ProcessData:
                 cleaned = {None}  # Or handle the error as needed (e.g., return a default value or an empty dict/list)
 
         return cleaned
+
+    @staticmethod
+    def EnsureDict(text):
+        data = ProcessData.CleanData(text)
+        if not isinstance(data, dict):
+            raise ValueError("AI response was not a valid JSON object.")
+        return data
             
             
-
-
 
