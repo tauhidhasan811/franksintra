@@ -44,7 +44,7 @@ metadata = {
 new_path = update_image_metadata(
     image_path="local.jpg",
     output_data=metadata,
-    cloudinary=cloudinary,
+    cloudinary=cloudinary
 )
 
 print("Saved:", new_path)

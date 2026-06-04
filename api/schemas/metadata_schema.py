@@ -1,4 +1,4 @@
-from typing import List, Optional, Literal
+from typing import List, Optional, Literal, Dict
 from pydantic import BaseModel
 
 
@@ -17,3 +17,8 @@ class ImageMetadata(BaseModel):
     SEO_keywords: List[str]
     # copyright: Optional[str] = None
     assign_location: Optional[LocationMetadata] = None
+
+class GetImageSchema(BaseModel):
+    image_url: str
+    metadata: ImageMetadata
+                     
