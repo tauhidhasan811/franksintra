@@ -12,7 +12,7 @@ class ConfigCloudinary:
         self.CLOUDINARY_API_KEY=os.getenv("CLOUDINARY_API_KEY")
         self.CLOUDINARY_API_SECRET=os.getenv("CLOUDINARY_API_SECRET")
 
-    def upload_data_to_cloudinary(self, file_path):
+    def upload_data_to_cloudinary(self, file_path, public_id):
 
         cloudinary.config(
             cloud_name=self.CLOUDINARY_CLOUD_NAME,
@@ -24,8 +24,8 @@ class ConfigCloudinary:
         result = cloudinary.uploader.upload(
             file_path,
             resource_type="raw",
-            folder="budget-data",
-            public_id="budget_data",
+            folder="franksintra",
+            public_id=public_id,
             overwrite=True
         )
 
