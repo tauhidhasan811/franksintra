@@ -12,19 +12,19 @@ class PromptGenerator:
         "assign_location": "Physical location or region visible or inferable from the image (e.g., 'New York, USA'). Use 'Unknown' if not determinable.",
 
         "gmb_post": {
-            "title": "Short, catchy title with relevant emojis (e.g., '✨ Make Laundry Day Effortless! ✨')",
+            "title": "Short, catchy title",
                     # Leave "" if title cannot be determined
             "intro": "One engaging opening sentence that hooks the reader and introduces the product/service",
                     # Leave "" if not enough product context
             "body": "2-3 sentences describing the product value proposition and who it is for",
                     # Leave "" if not enough product context
             "features": [
-                "✅ Key feature or benefit",
+                "Key feature or benefit",
                 # 3-5 bullet points. Leave [] if no features can be identified
             ],
             "closing": "One sentence summarizing the overall benefit and encouraging the reader",
                     # Leave "" if not determinable
-            "cta": "Call-to-action line with phone emoji (e.g., '📞 Contact us today to learn more!')",
+            "cta": "Call-to-action line with phone emoji (e.g., ' Contact us today to learn more!')",
                     # Leave "" if not determinable
             "hashtags": [
                 "#RelevantHashtag"
