@@ -4,6 +4,8 @@ from typing import Optional
 
 class ChatBody(BaseModel):
     image_url: str
+    assign_location: str
+    preferred_instructions: str
 
 
 class RegenerateChatBody(BaseModel):

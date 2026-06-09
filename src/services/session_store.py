@@ -9,6 +9,8 @@ from uuid import uuid4
 class ChatSession:
     session_id: str
     image_url: str
+    assign_location: str
+    preference_instructions: str
     response: dict[str, Any]
     history: list[dict[str, Any]] = field(default_factory=list)
     created_at: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
@@ -19,11 +21,13 @@ class ChatSessionStore:
     _sessions: dict[str, ChatSession] = {}
 
     @classmethod
-    def create(cls, image_url: str, response: dict[str, Any]) -> ChatSession:
+    def create(cls, image_url: str, assign_location: str, preference_instructions: str, response: dict[str, Any]) -> ChatSession:
         session_id = str(uuid4())
         session = ChatSession(
             session_id=session_id,
             image_url=image_url,
+            assign_location=assign_location,
+            preference_instructions=preference_instructions,
             response=deepcopy(response),
             history=[
                 {

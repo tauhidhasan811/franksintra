@@ -33,11 +33,15 @@ def _merge_regenerated_field(
 
 @router.post("/chat")
 async def chat(chat_body: ChatBody):
-    prompt = PromptGenerator.gen_prompt(image_url=chat_body.image_url)
+    prompt = PromptGenerator.gen_prompt(image_url=chat_body.image_url,
+                                        assign_location=chat_body.assign_location,
+                                        preference_instructions=chat_body.preferred_instructions)
     response_text = ConfigOpenAI().get_response(prompt)
     response = _parse_ai_response(response_text)
     session = ChatSessionStore.create(
         image_url=chat_body.image_url,
+        assign_location = chat_body.assign_location,
+        preference_instructions=chat_body.preferred_instructions,
         response=response,
     )
     return {

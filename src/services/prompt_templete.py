@@ -9,7 +9,12 @@ class PromptGenerator:
         "caption": "One-sentence engaging social media caption for this image",
         "SEO_keywords": ["list", "of", "5-10", "relevant", "SEO", "keywords"],
         "description": "2-3 sentence detailed product/image description optimized for SEO",
-        "assign_location": "Physical location or region visible or inferable from the image (e.g., 'New York, USA'). Use 'Unknown' if not determinable.",
+        "assign_location": {
+            "GPSLatitude": 'float', 
+            "GPSLatitudeRef": "N or S", 
+            "GPSLongitude": 'float', 
+            "GPSLongitudeRef": "E or W"
+        },
 
         "gmb_post": {
             "title": "Short, catchy title",
@@ -92,12 +97,14 @@ class PromptGenerator:
         ]
 
     @staticmethod
-    def _build_system_instruction() -> str:
+    def _build_system_instruction(assign_location: str, preference_instructions: str) -> str:
         schema = json.dumps(PromptGenerator.OUTPUT_FORMAT, indent=2)
         return (
             "You are an expert image analyst and SEO content specialist.\n"
             "When given an image, extract structured marketing and SEO metadata from it.\n"
+            "Your response tone should be user given preference instructions: " + preference_instructions + "\n"
             "Always respond with a single valid JSON object - no markdown, no explanation, no extra text.\n"
+            "User provided assign_location for GPS metadata: " + assign_location + "\n"
             "Your response must strictly follow this JSON schema:\n"
             f"{schema}\n"
             "Rules:\n"
@@ -109,7 +116,7 @@ class PromptGenerator:
         )
 
     @staticmethod
-    def gen_prompt(image_url: str) -> list:
+    def gen_prompt(image_url: str, assign_location: str, preference_instructions: str) -> list:
         """
         Generates the initial prompt to analyze an image and return structured JSON metadata.
         """
@@ -119,7 +126,8 @@ class PromptGenerator:
                 "content": [
                     {
                         "type": "input_text",
-                        "text": PromptGenerator._build_system_instruction()
+                        "text": PromptGenerator._build_system_instruction(assign_location=assign_location, 
+                                                                          preference_instructions=preference_instructions)
                     }
                 ]
             },
