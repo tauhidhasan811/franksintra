@@ -17,24 +17,44 @@ class PromptGenerator:
         },
 
         "gmb_post": {
-            "title": "Short, catchy title",
-                    # Leave "" if title cannot be determined
-            "intro": "One engaging opening sentence that hooks the reader and introduces the product/service",
-                    # Leave "" if not enough product context
-            "body": "2-3 sentences describing the product value proposition and who it is for",
-                    # Leave "" if not enough product context
+            "title": (
+                "Short catchy title. MUST include company name and city if known. "
+                "Example: 'Expert Appliance Repair Fixed Frigidaire Refrigerator in Las Vegas'"
+            ),
+
+            "intro": (
+                "One engaging opening sentence. MUST naturally mention company name "
+                "and city/location."
+            ),
+
+            "body": (
+                "2-3 SEO optimized sentences describing the service/product. "
+                "MUST mention company name and city at least once."
+            ),
+
             "features": [
-                "Key feature or benefit",
-                # 3-5 bullet points. Leave [] if no features can be identified
+                "Key feature or benefit"
+                # 3-5 items
             ],
-            "closing": "One sentence summarizing the overall benefit and encouraging the reader",
-                    # Leave "" if not determinable
-            "cta": "Call-to-action line with phone emoji (e.g., ' Contact us today to learn more!')",
-                    # Leave "" if not determinable
+
+            "closing": (
+                "One sentence summarizing benefits. "
+                "If company name or city is known, include them naturally."
+            ),
+
+            "cta": (
+                "Call-to-action with phone emoji. "
+                "Mention company name if possible."
+            ),
+
             "hashtags": [
                 "#RelevantHashtag"
-                # 8-12 total hashtags mixing product, industry, and lifestyle tags
-                # Leave [] if topic/product is completely unclear
+                # Include company, city, service, and industry hashtags.
+                # Example:
+                # #ExpertApplianceRepair
+                # #LasVegas
+                # #RefrigeratorRepair
+                # #FrigidaireRepair
             ]
         }
     }
@@ -113,6 +133,18 @@ class PromptGenerator:
             "- file_name must be lowercase, hyphen-separated, and contain no spaces or special characters.\n"
             "- If a field cannot be determined from the image, use the string 'Unknown'.\n"
             "- Output must be parseable by Python's json.loads()."
+            "Additional GMB Post Rules:\n"
+            "- GMB posts must be written in a local SEO style.\n"
+            "- ALWAYS include the company/business name if it can be determined.\n"
+            "- ALWAYS include the city/location name if it can be determined.\n"
+            "- The GMB title MUST contain both company name and city whenever available.\n"
+            "- Prefer action-oriented titles such as:\n"
+            "  * '{Company} Fixed {Brand} {Product} in {City}'\n"
+            "  * '{Company} Repaired {Product} in {City}'\n"
+            "  * '{Company} Installed {Product} in {City}'\n"
+            "- The intro and body must naturally repeat the company name and city for local SEO.\n"
+            "- Hashtags should include company name, city, service type, product type, and industry terms.\n"
+            "- If company name or city cannot be determined, use 'Unknown' for missing fields.\n"
         )
 
     @staticmethod
