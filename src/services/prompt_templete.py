@@ -117,11 +117,12 @@ class PromptGenerator:
         ]
 
     @staticmethod
-    def _build_system_instruction(assign_location: str, preference_instructions: str) -> str:
+    def _build_system_instruction(assign_location: str, company_name: str, preference_instructions: str) -> str:
         schema = json.dumps(PromptGenerator.OUTPUT_FORMAT, indent=2)
         return (
             "You are an expert image analyst and SEO content specialist.\n"
             "When given an image, extract structured marketing and SEO metadata from it.\n"
+            f" My Company Name is : {company_name}"
             "Your response tone should be user given preference instructions: " + preference_instructions + "\n"
             "Always respond with a single valid JSON object - no markdown, no explanation, no extra text.\n"
             "User provided assign_location for GPS metadata: " + assign_location + "\n"
@@ -148,7 +149,7 @@ class PromptGenerator:
         )
 
     @staticmethod
-    def gen_prompt(image_url: str, assign_location: str, preference_instructions: str) -> list:
+    def gen_prompt(image_url: str, company_name: str, assign_location: str, preference_instructions: str) -> list:
         """
         Generates the initial prompt to analyze an image and return structured JSON metadata.
         """
@@ -159,6 +160,7 @@ class PromptGenerator:
                     {
                         "type": "input_text",
                         "text": PromptGenerator._build_system_instruction(assign_location=assign_location, 
+                                                                          company_name = company_name,
                                                                           preference_instructions=preference_instructions)
                     }
                 ]

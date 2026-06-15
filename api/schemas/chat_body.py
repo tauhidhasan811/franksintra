@@ -5,6 +5,7 @@ from typing import Optional
 class ChatBody(BaseModel):
     image_url: str
     assign_location: str
+    company_name: str
     preferred_instructions: str
 
 
