@@ -12,6 +12,7 @@ class ChatSession:
     assign_location: str
     company_name: str
     preference_instructions: str
+    post_style: str
     response: dict[str, Any]
     history: list[dict[str, Any]] = field(default_factory=list)
     created_at: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
@@ -23,7 +24,7 @@ class ChatSessionStore:
 
     @classmethod
     def create(cls, image_url: str, assign_location: str, company_name: str,
-               preference_instructions: str, response: dict[str, Any]) -> ChatSession:
+               preference_instructions: str, post_style: str, response: dict[str, Any]) -> ChatSession:
         session_id = str(uuid4())
         session = ChatSession(
             session_id=session_id,
@@ -31,6 +32,7 @@ class ChatSessionStore:
             assign_location=assign_location,
             company_name = company_name,
             preference_instructions=preference_instructions,
+            post_style=post_style,
             response=deepcopy(response),
             history=[
                 {
@@ -57,18 +59,21 @@ class ChatSessionStore:
         response: dict[str, Any],
         update_field_name: str,
         user_instruction: str,
+        post_style: str,
     ) -> ChatSession | None:
         session = cls._sessions.get(session_id)
         if session is None:
             return None
 
         session.response = deepcopy(response)
+        session.post_style = post_style
         session.updated_at = datetime.now(timezone.utc).isoformat()
         session.history.append(
             {
                 "action": "regenerate",
                 "update_field_name": update_field_name,
                 "user_instruction": user_instruction,
+                "post_style": post_style,
                 "response": deepcopy(response),
                 "created_at": session.updated_at,
             }

@@ -33,10 +33,12 @@ def _merge_regenerated_field(
 
 @router.post("/chat")
 async def chat(chat_body: ChatBody):
+    post_style = PromptGenerator.pick_post_style()
     prompt = PromptGenerator.gen_prompt(image_url=chat_body.image_url,
                                         company_name = chat_body.company_name,
                                         assign_location=chat_body.assign_location,
-                                        preference_instructions=chat_body.preferred_instructions)
+                                        preference_instructions=chat_body.preferred_instructions,
+                                        post_style=post_style)
     response_text = ConfigOpenAI().get_response(prompt)
     response = _parse_ai_response(response_text)
     session = ChatSessionStore.create(
@@ -44,6 +46,7 @@ async def chat(chat_body: ChatBody):
         company_name= chat_body.company_name, 
         assign_location = chat_body.assign_location,
         preference_instructions=chat_body.preferred_instructions,
+        post_style=post_style,
         response=response,
     )
     return {
@@ -58,12 +61,21 @@ async def regenerate(chat_body: RegenerateChatBody):
     if session is None:
         raise HTTPException(status_code=404, detail="Session not found.")
 
+    # Rotate to a different angle so a refined post doesn't keep the old structure.
+    post_style = session.post_style
+    if chat_body.update_field_name == "gmb_post":
+        post_style = PromptGenerator.pick_post_style(exclude=session.post_style)
+
     try:
         prompt = PromptGenerator.regenerate_prompt(
             previous_response=session.response,
             update_field_name=chat_body.update_field_name,
             user_instruction=chat_body.user_instruction,
             image_url=session.image_url,
+            company_name=session.company_name,
+            assign_location=session.assign_location,
+            preference_instructions=session.preference_instructions,
+            post_style=post_style,
         )
     except ValueError as error:
         raise HTTPException(status_code=400, detail=str(error)) from error
@@ -80,6 +92,7 @@ async def regenerate(chat_body: RegenerateChatBody):
         response=response,
         update_field_name=chat_body.update_field_name,
         user_instruction=chat_body.user_instruction or "",
+        post_style=post_style,
     )
     if updated_session is None:
         raise HTTPException(status_code=404, detail="Session not found.")
