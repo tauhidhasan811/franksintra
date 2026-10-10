@@ -4,6 +4,7 @@ from src.config.config_chat_model import ConfigOpenAI
 from api.schemas.chat_body import ChatBody, RegenerateChatBody
 from src.services.data_processor import ProcessData
 from src.services.session_store import ChatSessionStore
+from src.services.gmb_post_checker import city_from_location, clean_gmb_post, find_gmb_post_problems
 
 router = APIRouter()
 
@@ -13,6 +14,37 @@ def _parse_ai_response(response_text: str) -> dict:
         return ProcessData.EnsureDict(response_text)
     except ValueError as error:
         raise HTTPException(status_code=502, detail=str(error)) from error
+
+
+def _get_checked_response(prompt: list, company_name: str, assign_location: str) -> dict:
+    """Calls the model and, if the GMB post breaks the client's rules, asks it once to fix them."""
+    response_text = ConfigOpenAI().get_response(prompt)
+    response = _parse_ai_response(response_text)
+    if not isinstance(response.get("gmb_post"), dict):
+        return response
+
+    city = city_from_location(assign_location)
+    problems = find_gmb_post_problems(response["gmb_post"], company_name, city)
+    if problems:
+        retry_prompt = prompt + [
+            {"role": "assistant", "content": response_text},
+            {
+                "role": "user",
+                "content": (
+                    "Fix these problems in gmb_post and return the same JSON object again:\n- "
+                    + "\n- ".join(problems)
+                ),
+            },
+        ]
+        try:
+            retry_post = _parse_ai_response(ConfigOpenAI().get_response(retry_prompt)).get("gmb_post")
+        except HTTPException:
+            retry_post = None
+        if isinstance(retry_post, dict) and len(find_gmb_post_problems(retry_post, company_name, city)) < len(problems):
+            response["gmb_post"] = retry_post
+
+    response["gmb_post"] = clean_gmb_post(response["gmb_post"])
+    return response
 
 
 def _merge_regenerated_field(
@@ -39,8 +71,7 @@ async def chat(chat_body: ChatBody):
                                         assign_location=chat_body.assign_location,
                                         preference_instructions=chat_body.preferred_instructions,
                                         post_style=post_style)
-    response_text = ConfigOpenAI().get_response(prompt)
-    response = _parse_ai_response(response_text)
+    response = _get_checked_response(prompt, chat_body.company_name, chat_body.assign_location)
     session = ChatSessionStore.create(
         image_url=chat_body.image_url,
         company_name= chat_body.company_name, 
@@ -80,8 +111,7 @@ async def regenerate(chat_body: RegenerateChatBody):
     except ValueError as error:
         raise HTTPException(status_code=400, detail=str(error)) from error
 
-    response_text = ConfigOpenAI().get_response(prompt)
-    generated_response = _parse_ai_response(response_text)
+    generated_response = _get_checked_response(prompt, session.company_name, session.assign_location)
     response = _merge_regenerated_field(
         previous_response=session.response,
         generated_response=generated_response,

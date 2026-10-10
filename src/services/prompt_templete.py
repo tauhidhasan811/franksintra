@@ -18,68 +18,57 @@ class PromptGenerator:
         },
 
         "gmb_post": {
-            "title": "Short catchy title in the pattern of the chosen post style. MUST include company name and city if known.",
-            "intro": "Opening line written in the chosen post style.",
-            "body": "Main text written in the chosen post style. MUST mention company name and city at least once.",
-            "features": [
-                "Item matching the chosen post style (count depends on the style)"
-            ],
-            "closing": "One closing sentence written in the chosen post style.",
-            "cta": "Call-to-action in plain text, no emojis.",
-            "hashtags": [
-                "#RelevantHashtag"
-                # Include company, city, service, and industry hashtags.
-            ]
+            "title": "Short catchy title (under 60 characters) about the appliance service or job. No business name, no city.",
+            "intro": "Opening sentence that names the business, the appliance service, and the city within its first 120 characters.",
+            "body": "2-4 sentences on the problem and the expertise used to solve it. Do not repeat the business name.",
+            "features": [],
+            "closing": "One sentence on the benefits for the customer.",
+            "cta": "One short plain-text call to action. No phone number and no business name.",
+            "hashtags": []
         }
     }
 
     # Reasoning models ignore temperature, so variety comes from rotating the post angle.
     POST_STYLES = {
         "job_recap": (
-            "Job recap: tell what the customer's problem was, what the team did, and the result. "
-            "Title like '{Company} Gets a {Brand} {Product} Running Again in {City}'. "
-            "features: 3-4 concrete steps the team performed."
+            "Job recap: after the opening, tell what the customer's problem was, what the technician did, "
+            "and how the appliance works now."
         ),
         "problem_solution": (
-            "Problem first: open with a symptom or frustration the reader recognizes, then show the fix. "
-            "Title framed as the problem, like '{Product} Not Working? {Company} Has {City} Covered'. "
-            "features: 3-5 warning signs to watch for."
+            "Problem and solution: after the opening, describe the symptom the customer noticed, "
+            "what caused it, and how it was fixed."
         ),
         "expert_tip": (
-            "Expert tip: lead with one useful piece of advice tied to the job in the image, "
-            "then position the company as the expert. Title like 'Pro Tip from {Company}: ... | {City}'. "
-            "features: 2-3 practical maintenance or usage tips."
+            "Expert insight: after the opening, explain the repair and share one useful piece of advice "
+            "that helps customers avoid the same problem."
         ),
         "before_after": (
-            "Before and after: contrast the condition before the work with the result after it. "
-            "Title like 'From {Problem} to {Result}: {Company} in {City}'. "
-            "features: 3-4 short 'before -> after' changes."
+            "Before and after: after the opening, contrast the appliance's condition before the service "
+            "with the result after it."
         ),
         "local_neighbor": (
-            "Local neighbor: warm, community voice that references the city and what local customers deal with. "
-            "Title like '{City} Homeowners Trust {Company} for {Service}'. "
-            "features: 3 reasons locals choose the company."
-        ),
-        "quick_update": (
-            "Quick update: very short and punchy. intro is one short sentence, body is at most 2 short sentences. "
-            "Title like 'Just Finished: {Service} in {City} by {Company}'. "
-            "features: an empty list []."
+            "Local and friendly: after the opening, use a warm neighborly voice and connect the job to what "
+            "local households deal with."
         ),
         "customer_question": (
-            "Customer question: intro is a question customers often ask about this product or service; "
-            "body answers it clearly. Title phrased as a question that includes {Company} and {City}. "
-            "features: 2-3 quick facts that support the answer."
+            "Customer question: after the opening, answer a question customers often ask about this "
+            "appliance problem, using the job as the example."
         ),
     }
 
     VARIETY_RULES = (
-        "Variety rules for the GMB post:\n"
-        "- Follow the chosen post style for tone, title pattern, and how the fields are used.\n"
-        "- Mention the company name and city in the title and at least once in the body; "
-        "do not repeat them in every field.\n"
-        "- Vary sentence length and opening words. Avoid stock openers like 'Looking for', "
-        "'At {Company}, we', 'Are you in need of', or 'Whether you'.\n"
-        "- Do not use emojis anywhere in the GMB post.\n"
+        "GMB post rules:\n"
+        "- intro, body, closing and cta joined with spaces must total 400 to 650 characters.\n"
+        "- The business name, the appliance service (e.g. 'refrigerator repair') and the city must all appear "
+        "within the first 120 characters of the post.\n"
+        "- Mention the business name exactly once in the whole post, in the intro.\n"
+        "- Mention the city naturally 1 to 2 times in the whole post.\n"
+        "- Write natural, engaging, professional content describing the problem, the expertise, "
+        "and the customer benefits. Follow the chosen post style.\n"
+        "- No hashtags, no phone numbers, no emojis, no keyword stuffing, and no repeated sentences or ideas.\n"
+        "- title is separate from the post text and does not count toward the 400 to 650 characters; "
+        "keep it under 60 characters with no business name, city, hashtags or emojis.\n"
+        "- features must be [] and hashtags must be [].\n"
     )
 
     @staticmethod
@@ -163,9 +152,6 @@ class PromptGenerator:
             "- Output must be parseable by Python's json.loads().\n"
             "Additional GMB Post Rules:\n"
             "- GMB posts must be written in a local SEO style.\n"
-            "- The GMB title MUST contain both company name and city whenever available.\n"
-            "- Hashtags should include company name, city, service type, product type, and industry terms.\n"
-            "- If company name or city cannot be determined, use 'Unknown' for missing fields.\n"
             f"Chosen post style for this GMB post: {PromptGenerator.POST_STYLES[post_style]}\n"
             f"{PromptGenerator.VARIETY_RULES}"
         )
@@ -251,7 +237,6 @@ class PromptGenerator:
             style_rules = (
                 f"New post style to use: {PromptGenerator.POST_STYLES[post_style]}\n"
                 f"{PromptGenerator.VARIETY_RULES}"
-                "- The GMB title MUST contain both company name and city whenever available.\n"
             )
 
         prompt = [{
